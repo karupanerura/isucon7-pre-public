@@ -126,3 +126,26 @@ pidstat -u -t -p $PID 2 # STACK
 pidstat -r -t -p $PID 2 # MEMORY
 pidstat -v -t -p $PID 2 # KERNEL
 ```
+
+## systemd
+### 起動系を直す
+
+```
+sudo -H systemctl stop SERVICE
+sudo -H systemctl disable SERVICE
+sudo -H systemctl enable SERVICE
+```
+
+### アプリ
+
+```
+sudo -H systemctl start SERVICE
+sudo -H systemctl stop SERVICE
+sudo -H systemctl restart SERVICE
+```
+
+### 設定ファイル
+
+```
+cat /etc/systemd/system/SERVICE.service
+```
