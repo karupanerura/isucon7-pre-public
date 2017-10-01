@@ -1,6 +1,8 @@
 # ISUCON7あんちょこ
 
-Ansibleはこちら: [ansible/README.md](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/README.md)
+* [Ansible](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/README.md)
+* [スタートダッシュ](https://github.com/karupanerura/isucon7-pre/blob/master/anchoko/START-DASH.md)
+* [負荷分析](https://github.com/karupanerura/isucon7-pre/blob/master/anchoko/FUKABUNSEKI.md)
 
 ## スロークエリログの分析
 
@@ -117,14 +119,32 @@ sudo iostat -d -x -t 2
 sudo dstat -tam 10
 ```
 
+## ss
+
+```bash
+sudo ss -nlp
+```
+
+## top
+
+```bash
+sudo top -d1
+```
+
 ## pidstat
 
 ```bash
-pidstat -d -t -p $PID 2 # IO
-pidstat -s -t -p $PID 2 # CPU
-pidstat -u -t -p $PID 2 # STACK
-pidstat -r -t -p $PID 2 # MEMORY
-pidstat -v -t -p $PID 2 # KERNEL
+sudo pidstat -d -t -p $PID 2 # IO
+sudo pidstat -s -t -p $PID 2 # CPU
+sudo pidstat -u -t -p $PID 2 # STACK
+sudo pidstat -r -t -p $PID 2 # MEMORY
+sudo pidstat -v -t -p $PID 2 # KERNEL
+```
+
+## strace
+
+```bash
+sudo strace -p $PID
 ```
 
 ## systemd
@@ -158,3 +178,8 @@ mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transac
 ## 開発環境の mysql setup
 ```
 echo 'CREATE USER $MYSQL_USER IDENTIFIED BY $MYSQL_PASS; GRANT ALL PRIVILEGES ON ${DATABASE}.*' | mysql -uroot'
+```
+
+## バイブル
+
+http://blog.father.gedow.net/2012/10/23/linux-command-for-trouble/
