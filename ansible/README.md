@@ -1,13 +1,18 @@
 # install
 
+devサーバーでは最初から入れてある。
+
 ```bash
 brew install ansible
 ```
 
 # ホスト情報を更新
 
+初回のみ。
+
 ```bash
-bin/update-hosts.pl > hosts
+$EDITOR hosts
+git commit -m 'set hosts' hosts
 ```
 
 # run
@@ -34,4 +39,16 @@ ansible-playbook -i hosts playbook.yaml --tags mysql
 
 ```bash
 ansible-playbook -i hosts playbook.yaml --tags supervisor
+```
+
+## h2o
+
+```bash
+ansible-playbook -i hosts h2o.yaml --tags build
+```
+
+### 設定のみ
+
+```bash
+ansible-playbook -i hosts h2o.yaml --tags configute
 ```
