@@ -177,7 +177,7 @@ mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transac
 
 ## 開発環境の mysql setup
 ```
-echo 'CREATE USER $MYSQL_USER IDENTIFIED BY $MYSQL_PASS; GRANT ALL PRIVILEGES ON ${DATABASE}.*' | mysql -uroot'
+echo "CREATE USER $MYSQL_USER IDENTIFIED BY $MYSQL_PASS; GRANT ALL PRIVILEGES ON ${DATABASE}.*" | mysql -uroot
 ```
 
 ## バイブル
