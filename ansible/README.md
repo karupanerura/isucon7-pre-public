@@ -8,7 +8,7 @@ brew install ansible
 
 # ホスト情報を更新
 
-初回のみ。
+初回のみ。 `FILL ME` とコメントされてるところにIPを改行区切りで書けばOK。
 
 ```bash
 $EDITOR hosts
