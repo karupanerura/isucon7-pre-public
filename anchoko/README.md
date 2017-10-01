@@ -172,7 +172,7 @@ cat /etc/systemd/system/SERVICE.service
 
 ## mysqldump
 ```
-mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transaction > isucon7.dump
+mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transaction | gzip -c > ~/serve/isucon7.sql.gz
 ```
 
 ## 開発環境の mysql setup
