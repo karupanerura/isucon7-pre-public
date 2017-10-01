@@ -1,0 +1,62 @@
+---
+
+- name: creates /etc/h2o
+  file:
+    path: /etc/h2o
+    state: directory
+    mode: 0755
+
+- name: creates /etc/h2o/conf.d
+  file:
+    path: /etc/h2o/conf.d
+    state: directory
+    mode: 0755
+
+- name: creates /var/lib/h2o
+  file:
+    path: /var/lib/h2o
+    state: directory
+    mode: 0755
+
+- name: creates /var/log/h2o
+  file:
+    path: /var/log/h2o
+    state: directory
+    mode: 0755
+
+- name: creates /var/lib/h2o/{{ item }}
+  file:
+    path: /var/lib/h2o/{{ item }}
+    state: directory
+    mode: 0755
+  with_items:
+    - example.com
+
+- name: setup h2o conf.d
+  copy:
+    src: etc/h2o/conf.d/
+    dest: /etc/h2o/conf.d
+    directory_mode: true
+
+- name: render h2o.conf
+  template:
+    src: h2o.conf.j2
+    dest: /etc/h2o/h2o.conf
+    validate: /opt/h2o/latest/bin/h2o -t -c %s
+
+- name: setup h2o.service
+  copy:
+    src: etc/systemd/system/h2o.service
+    dest: /etc/systemd/system/h2o.service
+
+- name: setup h2o systemd.service
+  systemd:
+    unit: h2o.service
+    daemon_reload: yes
+    enabled: yes
+    state: started
+
+- name: reload systemd
+  systemd:
+    unit: h2o.service
+    state: reloaded

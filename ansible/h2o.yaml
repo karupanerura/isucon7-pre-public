@@ -1,0 +1,18 @@
+---
+
+- hosts: web
+  become: yes
+  tasks:
+    - include: tasks/h2o/01_build.yaml
+    - include: tasks/h2o/02_configure.yaml
+  vars:
+    version: 2.2.2
+  tags:
+    - build
+
+- hosts: web
+  become: yes
+  tasks:
+    - include: tasks/h2o/02_configure.yaml
+  tags:
+    - configure

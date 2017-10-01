@@ -1,0 +1,15 @@
+[Unit]
+Description=H2O the optimized HTTP/1, HTTP/2 server
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/h2o.pid
+ExecStartPre=/opt/h2o/latest/bin/h2o -c /etc/h2o/h2o.conf -t
+ExecStart=/opt/h2o/latest/bin/h2o -c /etc/h2o/h2o.conf -m daemon
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

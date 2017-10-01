@@ -1,0 +1,64 @@
+---
+
+- name: remove nano
+  apt: name=nano state=absent
+- name: install packages (build tools)
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - build-essential
+    - pkg-config
+    - cmake
+    - autoconf
+- name: install packages (libraries)
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - libmysqlclient-dev
+    - libssl-dev
+    - libreadline-dev
+    - libxml2-dev
+    - libpcre3-dev
+- name: install packages (tools)
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - vim
+    - dstat
+    - screen
+    - sysstat
+    - tmux
+    - ngrep
+    - tcpdump
+    - curl
+    - wget
+    - git
+    - perl
+    - perl-doc
+    - zip
+- name: install packages (tools)
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600 allow_unauthenticated=yes
+  with_items:
+    - percona-toolkit
+- name: install packages (daemons)
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - nginx
+    - memcached
+    - redis-server
+    - mysql-server
+    - mysql-common
+    - mysql-client
+- name: download and install lltsv
+  get_url: url=https://github.com/sonots/lltsv/releases/download/v0.6.1/lltsv_linux_amd64 dest=/usr/bin/lltsv mode=0755
+- name: download alp
+  get_url: url=https://github.com/tkuchiki/alp/releases/download/v0.3.1/alp_linux_amd64.zip dest=/tmp/alp_linux_amd64.zip
+- name: unarchive alp
+  unarchive: src=/tmp/alp_linux_amd64.zip dest=/usr/bin mode=0755 copy=no
+- name: creates /opt/go/1.9
+  file: path={{ item }} state=directory mode=0755
+  with_items:
+    - /opt
+    - /opt/go
+    - /opt/go/1.9
+- name: download go 1.9
+  get_url: url=https://storage.googleapis.com/golang/go1.9.linux-amd64.tar.gz dest=/tmp/go1.9.linux-amd64.tar.gz
+- name: unarchive go 1.9
+  unarchive: src=/tmp/go1.9.linux-amd64.tar.gz dest=/opt/go/1.9 mode=0755 copy=no

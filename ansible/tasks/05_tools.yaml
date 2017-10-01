@@ -1,0 +1,7 @@
+---
+
+- name: install tools
+  copy: src=bin/{{ item }} dest=/usr/bin/{{ item }} owner=root group=root mode=0755
+  with_items:
+    - logrotate.pl
+    - restart.sh

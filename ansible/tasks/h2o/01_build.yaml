@@ -1,0 +1,55 @@
+---
+
+- name: check /opt/src/h2o
+  stat: path=/opt/src/h2o
+  register: repo
+
+- name: git reset --hard
+  command: git reset --hard
+  args:
+    chdir: /opt/src/h2o
+  when: repo.stat.exists
+
+- name: git clean -dxf
+  command: git clean -dxf
+  args:
+    chdir: /opt/src/h2o
+  when: repo.stat.exists
+
+- name: clone h2o v{{ version }} to /opt/src/h2o
+  git:
+    repo: https://github.com/h2o/h2o.git
+    dest: /opt/src/h2o
+    version: "v{{ version }}"
+    refspec: +refs/tags/*:refs/remotes/origin/tags/*
+    depth: 1
+    force: yes
+    track_submodules: yes
+
+- name: install deps
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - gcc
+    - ruby
+    - bison
+
+- name: cmake
+  command: cmake -DCMAKE_INSTALL_PREFIX=/opt/h2o/v{{ version }} -DWITH_BUNDLED_SSL=on -DWITH_MRUBY=on .
+  args:
+    chdir: /opt/src/h2o
+    creates: Makefile
+
+- name: make
+  make:
+    chdir: /opt/src/h2o
+
+- name: make install
+  make:
+    chdir: /opt/src/h2o
+    target: install
+
+- name: update link to latest
+  file:
+    src: /opt/h2o/v{{ version }}
+    dest: /opt/h2o/latest
+    state: link
