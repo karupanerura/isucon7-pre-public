@@ -175,6 +175,11 @@ cat /etc/systemd/system/SERVICE.service
 mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transaction | gzip -c > ~/serve/isucon7.sql.gz
 ```
 
+## mysqldump の読み込み
+```
+zcat isucon7.sql.gz | mysql -uroot
+```
+
 ## 開発環境の mysql setup
 ```
 echo "CREATE USER $MYSQL_USER IDENTIFIED BY $MYSQL_PASS; GRANT ALL PRIVILEGES ON ${DATABASE}.*" | mysql -uroot
