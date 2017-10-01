@@ -1,8 +1,10 @@
 # ISUCON7あんちょこ
 
+Ansibleはこちら: [ansible/README.md](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/README.md)
+
 ## スロークエリログの分析
 
-設定は https://github.com/karupanerura/isucon7-pre/blob/master/config/mysqld.cnf を確認すること
+設定は [config/mysqld.cnf](https://github.com/karupanerura/isucon7-pre/blob/master/config/mysqld.cnf) を確認すること
 基本的には `/tmp/mysql-slow.log` に出るはず。
 
 ### 時間順に出す
