@@ -170,11 +170,19 @@ sudo -H systemctl restart SERVICE
 cat /etc/systemd/system/SERVICE.service
 ```
 
+## SimpleHTTPServer
+
+default: 8000/tcp
+
+```
+python -m SimpleHTTPServer # [PORT]
+```
+
 ## mysqldump
 ```
 env MYSQL_PWD=$MYSQL_PASS mysqldump -u$MYSQL_USER $DATABASE $TABLE1 $TABLE2 --single-transaction --databases | gzip -c > ~/serve/isucon7.sql.gz
 # 確認
-gunzip -c isuketch.sql.gz | head -n 30
+gunzip -c ~/serve/isucon7.sql.gz | head -n 30
 ```
 
 ## mysqldump の読み込み
