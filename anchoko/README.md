@@ -172,7 +172,7 @@ cat /etc/systemd/system/SERVICE.service
 
 ## mysqldump
 ```
-env MYSQL_PWD=$MYSQL_PASS mysqldump -u$MYSQL_USER $DATABASE $TABLE1 $TABLE2 --single-transaction | gzip -c > ~/serve/isucon7.sql.gz
+env MYSQL_PWD=$MYSQL_PASS mysqldump -u$MYSQL_USER $DATABASE $TABLE1 $TABLE2 --single-transaction --databases | gzip -c > ~/serve/isucon7.sql.gz
 # 確認
 gunzip -c isuketch.sql.gz | head -n 30
 ```
