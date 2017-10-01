@@ -1,25 +1,26 @@
-# ISUCON6あんちょこ
+# ISUCON7あんちょこ
 
 ## スロークエリログの分析
 
-設定は https://github.com/karupanerura/isucon6-qualifier/blob/master/config/mysqld.cnf を確認すること
+設定は https://github.com/karupanerura/isucon7-pre/blob/master/config/mysqld.cnf を確認すること
+基本的には `/tmp/mysql-slow.log` に出るはず。
 
 ### 時間順に出す
 
 ```bash
-sudo -H mysqldumpslow -s t /tmp/mysql-slow.log
+sudo mysqldumpslow -s t /tmp/mysql-slow.log
 ```
 
 ### 回数順に出す
 
 ```bash
-sudo -H mysqldumpslow -s c /tmp/mysql-slow.log
+sudo mysqldumpslow -s c /tmp/mysql-slow.log
 ```
 
 ### digest
 
 ```bash
-sudo -H pt-query-digest /tmp/mysql-slow.log
+sudo pt-query-digest /tmp/mysql-slow.log
 ```
 
 ## アクセスログの分析
@@ -45,13 +46,20 @@ sudo -H logrotate.pl mysql /tmp/mysql-slow.log
 ## コンフィグテスト
 
 ```bash
-sudo -H /home/isucon/nginx/sbin/nginx -t
+sudo nginx -t
+sudo h2o -c /etc/h2o/h2o.conf -t
 ```
 
 ## nginx
 
 ```bash
 systemctl restart nginx
+```
+
+## h2o
+
+```bash
+systemctl restart h2o
 ```
 
 ## mysql
@@ -70,21 +78,41 @@ gzip -k index.html
 ## netstat
 
 ```bash
-sudo -H netstat -tlnp
-sudo -H netstat -tnp | grep ESTABLISHED
+sudo netstat -tlnp
+sudo netstat -tnp | grep ESTABLISHED
+```
+
+## ss
+
+```bash
+sudo ss -nlp
+```
+
+## ip
+
+```bash
+sudo ip addr show
+sudo ip route show
+sudo ip tunnel show
 ```
 
 ## lsof
 
 ```bash
-sudo -H lsof -nP -i4TCP -sTCP:LISTEN
-sudo -H lsof -nP -i4TCP -sTCP:ESTABLISHED
+sudo lsof -nP -i4TCP -sTCP:LISTEN
+sudo lsof -nP -i4TCP -sTCP:ESTABLISHED
 ```
 
 ## iostat
 
 ```bash
-sudo -H iostat -d -x -t 2
+sudo iostat -d -x -t 2
+```
+
+## dstat
+
+```bash
+sudo dstat -tam 10
 ```
 
 ## pidstat
