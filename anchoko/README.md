@@ -149,3 +149,12 @@ sudo -H systemctl restart SERVICE
 ```
 cat /etc/systemd/system/SERVICE.service
 ```
+
+## mysqldump
+```
+mysqldump -u$MYSQL_USER -p$MYSQL_PASS $DATABASE $TABLE1 $TABLE2 --single-transaction > isucon7.dump
+```
+
+## 開発環境の mysql setup
+```
+echo 'CREATE USER $MYSQL_USER IDENTIFIED BY $MYSQL_PASS; GRANT ALL PRIVILEGES ON ${DATABASE}.*' | mysql -uroot'
