@@ -21,6 +21,7 @@ use constant {
 my %SERVERS = (
     0 => 'server-1',
     1 => 'server-2',
+    2 => 'server-3',
 );
 my $MY_IP = `ip addr show scope global up | perl -ne 'print $1 if /(192\.168\..*)\//'`;
 
