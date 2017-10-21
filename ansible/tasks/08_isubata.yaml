@@ -1,7 +1,7 @@
 ---
 
 - name: git pull
-  git: repo=git@github.com:karupanerura/isucon7-pre.git version=master dest=/home/isucon/isubata update=yes
+  git: repo=git@github.com:karupanerura/isucon7-pre.git version={{ branch }} dest=/home/isucon/isubata update=yes
   become: yes
   become_user: isucon
 - name: carton install
