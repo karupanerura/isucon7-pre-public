@@ -434,14 +434,16 @@ post '/profile' => [qw/login_required/] => sub {
 
         $avatar_name = $digest . $ext;
         $avatar_data = $data;
+
+        system('cp ' . $file->path . ' ./public/icons/');
     }
 
-    if ($avatar_name && $avatar_data) {
-        $self->dbh->query(qq{INSERT INTO image (name, data) VALUES (?, _binary ?)}, $avatar_name, $avatar_data);
+    my $avatar_updated = ($avatar_name && $avatar_data);
+    if ($avatar_updated && $display_name) {
+        $self->dbh->query(qq{UPDATE user SET avatar_icon = ?,  display_name = ? WHERE id = ?}, $avatar_name, $display_name, $user_id);
+    } elsif ($avatar_updated) {
         $self->dbh->query(qq{UPDATE user SET avatar_icon = ? WHERE id = ?}, $avatar_name, $user_id);
-    }
-
-    if ($display_name) {
+    } elsif ($display_name) {
         $self->dbh->query(qq{UPDATE user SET display_name = ? WHERE id = ?}, $display_name, $user_id);
     }
 
