@@ -56,5 +56,5 @@ ansible-playbook -i hosts h2o.yaml --tags configute
 ## isubata
 
 ```bash
-ansible-playbook -i hosts playbook.yaml --tags app
+ansible-playbook -i hosts playbook.yaml --tags app -e branch=master
 ```
