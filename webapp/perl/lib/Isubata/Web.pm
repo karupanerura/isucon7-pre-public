@@ -318,7 +318,7 @@ get '/fetch' => sub {
         $c->halt(403);
     }
 
-    usleep(100);
+    sleep(1);
 
     my $channels = $self->dbh->select_all(qq{SELECT id, count, max_message_id FROM channel});
     my $channel_ids = [map $_->{id}, @$channels];
