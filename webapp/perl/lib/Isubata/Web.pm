@@ -418,7 +418,6 @@ post '/profile' => [qw/login_required/] => sub {
 
     my $display_name = $c->req->parameters->{display_name};
     my $avatar_name;
-    my $avatar_data;
 
     my $file = $c->req->uploads->{avatar_icon};
 
@@ -455,11 +454,9 @@ post '/profile' => [qw/login_required/] => sub {
         }
 
         $avatar_name = $server_id . '/' . $avatar_basename;
-        $avatar_data = $data;
     }
 
-    my $avatar_updated = ($avatar_name && $avatar_data);
-    if ($avatar_updated && $display_name) {
+    if ($avatar_name && $display_name) {
         $self->dbh->query(qq{UPDATE user SET avatar_icon = ?,  display_name = ? WHERE id = ?}, $avatar_name, $display_name, $user_id);
     } elsif ($avatar_updated) {
         $self->dbh->query(qq{UPDATE user SET avatar_icon = ? WHERE id = ?}, $avatar_name, $user_id);
