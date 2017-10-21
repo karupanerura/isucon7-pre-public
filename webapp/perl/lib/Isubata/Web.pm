@@ -23,6 +23,7 @@ my %SERVERS = (
     1 => 'server-2',
     2 => 'server-3',
 );
+my %SERVERS_REV = reverse %SERVERS;
 my $MY_IP = `ip addr show scope global up | perl -ne 'print $1 if /(192\.168\..*)\//'`;
 
 sub dbh {
@@ -440,7 +441,7 @@ post '/profile' => [qw/login_required/] => sub {
             $sha1->hexdigest;
         };
 
-        my $server_id = int rand keys %SERVERS;
+        my $server_id = $SERVERS_REV{$MY_IP};
         my $server = $SERVERS{$server_id};
         my $avatar_basename = $digest . $ext;
 
