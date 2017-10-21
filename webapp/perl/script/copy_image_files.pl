@@ -3,7 +3,6 @@ use warnings;
 use utf8;
 
 use DBIx::Sunny;
-use Digest::SHA1 qw(sha1_hex);
 
 sub dbh {
     my $self = shift;
@@ -34,10 +33,7 @@ my $rows = dbh->select_all(qq{SELECT * FROM image});
 
 for my $row (@$rows) {
     my $data = $row->{data};
-    my $digest = sha1_hex($data);
-    my $idx  = index($row->{name}, ".");
-    my $ext  = (0 <= $idx) ? substr($row->{name}, $idx) : "";
-    my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $digest . $ext;
+    my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $row->{name};
     print("$fullpath\n");
 
     open my $fh, '>', $fullpath;
