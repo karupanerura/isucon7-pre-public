@@ -297,7 +297,7 @@ get '/message' => sub {
         }
 
         my $max_message_id = max(map { $_->{id} } @$rows) || 0;
-        my $channel_count = $self->dbh->select_one(qq{SELECT count FROM channels WHERE id = ?}, $channel_id);
+        my $channel_count = $self->dbh->select_one(qq{SELECT count FROM channel WHERE id = ?}, $channel_id);
 
         $self->dbh->query(qq{
             INSERT INTO haveread (user_id, channel_id, count, updated_at, created_at)
