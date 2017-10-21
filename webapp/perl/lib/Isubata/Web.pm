@@ -12,6 +12,7 @@ use DateTime::Format::MySQL;
 use List::Util qw(max);
 use POSIX qw(ceil);
 use Scalar::Util qw(looks_like_number);
+use Time::HiRes qw(usleep);
 
 use constant {
     AVATAR_MAX_SIZE => 1 * 1024 * 1024,
@@ -55,6 +56,7 @@ sub add_message {
         qq{INSERT INTO message (channel_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())},
         $channel_id, $user_id, $message,
     );
+    $self->dbh->query(qq{update channel set count = count+1 where id = ?}, $channel_id);
 }
 
 sub get_channel_list_info {
@@ -140,6 +142,7 @@ get '/initialize' => sub {
     $self->dbh->query("DELETE FROM channel WHERE id > 10");
     $self->dbh->query("DELETE FROM message WHERE id > 10000");
     $self->dbh->query("DELETE FROM haveread");
+    $self->dbh->query("UPDATE channel SET count = (SELECT COUNT(1) FROM message WHERE channel_id = channel.id)");
 
     $c->res->status(204);
     $c->res->body("");
@@ -245,16 +248,31 @@ get '/message' => sub {
     my $last_message_id = $c->req->parameters->{last_message_id};
 
     my $rows = $self->dbh->select_all(
-        qq{SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100},
+        qq{
+SELECT
+message.id as message_id,
+channel_id,
+user_id,
+user.name as user_name,
+display_name,
+avatar_icon,
+content,
+message.created_at
+FROM message inner join user on user.id = user_id
+WHERE message.id > ? AND channel_id = ? ORDER BY message.id DESC LIMIT 100
+},
         $last_message_id, $channel_id,
     );
 
     my @res;
     for my $row (@$rows) {
-        my $user = $self->dbh->select_row(qq{SELECT name, display_name, avatar_icon FROM user WHERE id = ?}, $row->{user_id});
         unshift @res, {
             id      => $row->{id},
-            user    => $user,
+            user    => {
+                name => $row->{user_name},
+                display_name => $row->{display_name},
+                avatar_icon => $row->{avatar_icon},
+            },
             date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
             content => $row->{content},
         };
@@ -262,13 +280,13 @@ get '/message' => sub {
 
     if (0 < scalar @$rows) {
         my $max_message_id = max(map { $_->{id} } @$rows);
-        my $unread = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
+        my $unread_count = $self->dbh->select_one(qq{SELECT COUNT(1) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
 
         $self->dbh->query(qq{
             INSERT INTO haveread (user_id, channel_id, message_id, count, updated_at, created_at)
             VALUES (?, ?, ?, ?, NOW(), NOW())
             ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()
-        }, $user_id, $channel_id, $max_message_id, $unread, $max_message_id);
+        }, $user_id, $channel_id, $max_message_id, $unread_count, $max_message_id);
     }
 
     $c->render_json(\@res);
@@ -282,10 +300,12 @@ get '/fetch' => sub {
         $c->halt(403);
     }
 
-    sleep(1);
+    usleep(100);
 
-    my $channels = $self->dbh->select_all(qq{SELECT * FROM channel});
-    my %haveread_map = map { $_->{channel_id} => $_ } @{ $self->dbh->select_all(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id IN (?)}, $user_id, [map $_->{id}, @$channels]) };
+    my $channels = $self->dbh->select_all(qq{SELECT id, count FROM channel});
+    my $channel_ids = [map $_->{id}, @$channels];
+    my $haveReads = $self->dbh->select_all(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id IN (?)}, $user_id, $channel_ids);
+    my %haveread_map = map { $_->{channel_id} => $_ } @$haveReads;
 
     my @res;
     for my $channel (@$channels) {
@@ -293,17 +313,16 @@ get '/fetch' => sub {
         my $haveread = $haveread_map{$channel->{id}};
         if ($haveread) {
             if ($haveread->{message_id} < $channel->{max_message_id}) {
-                $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $haveread->{message_id});
+                $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel->{id}, $haveread->{message_id});
             } else {
                 $cnt = $haveread->{count};
             }
         }
         push @res, {
-            channel_id => $channel_id,
+            channel_id => $channel->{id},
             unread     => $cnt,
         };
     }
-
     $c->render_json(\@res);
 };
 
