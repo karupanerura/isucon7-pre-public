@@ -56,8 +56,7 @@ sub add_message {
         qq{INSERT INTO message (channel_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())},
         $channel_id, $user_id, $message,
     );
-    my $message_id = $self->dbh->last_insert_id;
-    $self->dbh->query(qq{update channel set count = count+1, max_message_id = ? where id = ?}, $message_id, $channel_id);
+    $self->dbh->query(qq{update channel set count = count+1 where id = ?}, $channel_id);
 }
 
 sub get_channel_list_info {
@@ -298,13 +297,13 @@ get '/message' => sub {
         }
 
         my $max_message_id = max(map { $_->{id} } @$rows) || 0;
-        my $unread_count = $self->dbh->select_one(qq{SELECT COUNT(1) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
+        my $channel_count = $self->dbh->select_one(qq{SELECT count FROM channels WHERE id = ?}, $channel_id);
 
         $self->dbh->query(qq{
-            INSERT INTO haveread (user_id, channel_id, message_id, count, updated_at, created_at)
-            VALUES (?, ?, ?, ?, NOW(), NOW())
-            ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()
-        }, $user_id, $channel_id, $max_message_id, $unread_count, $max_message_id);
+            INSERT INTO haveread (user_id, channel_id, count, updated_at, created_at)
+            VALUES (?, ?, ?, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE updated_at = NOW()
+        }, $user_id, $channel_id, $channel_count);
     }
 
     $c->render_json(\@res);
@@ -320,25 +319,17 @@ get '/fetch' => sub {
 
     sleep(1);
 
-    my $channels = $self->dbh->select_all(qq{SELECT id, count, max_message_id FROM channel});
-    my $channel_ids = [map $_->{id}, @$channels];
-    my $haveReads = $self->dbh->select_all(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id IN (?)}, $user_id, $channel_ids);
-    my %haveread_map = map { $_->{channel_id} => $_ } @$haveReads;
+    my $channels = $self->dbh->select_all(qq{SELECT id, count FROM channel});
+    my $havereads = $self->dbh->select_all(qq{SELECT channel_id, count FROM haveread where user_id = ?}, $user_id);
+
+    my %haveread_map = map { $_->{channel_id} => $_->{count} } @$havereads;
 
     my @res;
     for my $channel (@$channels) {
-        my $cnt = $channel->{count};
-        my $haveread = $haveread_map{$channel->{id}};
-        if ($haveread) {
-            if ($haveread->{message_id} < $channel->{max_message_id}) {
-                $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel->{id}, $haveread->{message_id});
-            } else {
-                $cnt = $haveread->{count};
-            }
-        }
+        my $haveread = $haveread_map{$channel->{id}} || 0;
         push @res, {
             channel_id => $channel->{id} + 0,
-            unread     => $cnt,
+            unread => $channel->{count} - $haveread,
         };
     }
     $c->render_json(\@res);
