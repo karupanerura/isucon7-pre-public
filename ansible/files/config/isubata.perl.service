@@ -1,5 +1,6 @@
 [Unit]
 Description = isucon7 qualifier main application in perl
+After=network-online.target
 
 [Service]
 WorkingDirectory=/home/isucon/isubata/webapp/perl
@@ -13,4 +14,4 @@ User      = isucon
 Group     = isucon
 
 [Install]
-WantedBy = multi-user.target
+WantedBy = network-online.target
