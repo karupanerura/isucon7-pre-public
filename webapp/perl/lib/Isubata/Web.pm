@@ -450,7 +450,8 @@ post '/profile' => [qw/login_required/] => sub {
         if ($server eq $MY_IP) {
             rename $file->path, $fullpath;
         } else {
-            system scp => $file->path, 'isucon'.'@'.$server.':'.$fullpath;
+            system scp => -o => 'StrictHostKeyChecking=no',
+                $file->path, 'isucon'.'@'.$server.':'.$fullpath;
         }
 
         $avatar_name = $server_id . '/' . $avatar_basename;
