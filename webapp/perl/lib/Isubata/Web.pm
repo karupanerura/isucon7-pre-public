@@ -262,12 +262,13 @@ get '/message' => sub {
 
     if (0 < scalar @$rows) {
         my $max_message_id = max(map { $_->{id} } @$rows);
+        my $unread = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
 
         $self->dbh->query(qq{
-            INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)
-            VALUES (?, ?, ?, NOW(), NOW())
+            INSERT INTO haveread (user_id, channel_id, message_id, count, updated_at, created_at)
+            VALUES (?, ?, ?, ?, NOW(), NOW())
             ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()
-        }, $user_id, $channel_id, $max_message_id, $max_message_id);
+        }, $user_id, $channel_id, $max_message_id, $unread, $max_message_id);
     }
 
     $c->render_json(\@res);
@@ -283,16 +284,19 @@ get '/fetch' => sub {
 
     sleep(1);
 
-    my @channel_ids = map { $_->{id} } @{$self->dbh->select_all(qq{SELECT id FROM channel})};
+    my $channels = $self->dbh->select_all(qq{SELECT * FROM channel});
+    my %haveread_map = map { $_->{channel_id} => $_ } @{ $self->dbh->select_all(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id IN (?)}, $user_id, [map $_->{id}, @$channels]) };
 
     my @res;
-    for my $channel_id (@channel_ids) {
-        my $row = $self->dbh->select_row(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id = ?}, $user_id, $channel_id);
-        my $cnt = 0;
-        if ($row) {
-            $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id}, $channel_id, $row->{message_id});
-        } else {
-            $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?}, $channel_id);
+    for my $channel (@$channels) {
+        my $cnt = $channel->{count};
+        my $haveread = $haveread_map{$channel->{id}};
+        if ($haveread) {
+            if ($haveread->{message_id} < $channel->{max_message_id}) {
+                $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $haveread->{message_id});
+            } else {
+                $cnt = $haveread->{count};
+            }
         }
         push @res, {
             channel_id => $channel_id,
