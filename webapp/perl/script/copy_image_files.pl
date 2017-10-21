@@ -35,8 +35,8 @@ my $rows = dbh->select_all(qq{SELECT * FROM image});
 for my $row (@$rows) {
     my $data = $rows->{data};
     my $digest = sha1_hex($data);
-    my $idx  = index($data->{name}, ".");
-    my $ext  = (0 <= $idx) ? substr($data->{name}, $idx) : "";
+    my $idx  = index($row->{name}, ".");
+    my $ext  = (0 <= $idx) ? substr($row->{name}, $idx) : "";
     my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $digest . $ext;
     print("$fullpath\n");
 
