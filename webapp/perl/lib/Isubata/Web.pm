@@ -56,7 +56,8 @@ sub add_message {
         qq{INSERT INTO message (channel_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())},
         $channel_id, $user_id, $message,
     );
-    $self->dbh->query(qq{update channel set count = count+1 where id = ?}, $channel_id);
+    my $message_id = $self->dbh->last_insert_id;
+    $self->dbh->query(qq{update channel set count = count+1, max_message_id = ? where id = ?}, $message_id, $channel_id);
 }
 
 sub get_channel_list_info {
@@ -143,6 +144,7 @@ get '/initialize' => sub {
     $self->dbh->query("DELETE FROM message WHERE id > 10000");
     $self->dbh->query("DELETE FROM haveread");
     $self->dbh->query("UPDATE channel SET count = (SELECT COUNT(1) FROM message WHERE channel_id = channel.id)");
+    $self->dbh->query("UPDATE channel SET max_message_id = (SELECT MAX(id) FROM message WHERE channel_id = channel.id)");
 
     $c->res->status(204);
     $c->res->body("");
@@ -318,7 +320,7 @@ get '/fetch' => sub {
 
     usleep(100);
 
-    my $channels = $self->dbh->select_all(qq{SELECT id, count FROM channel});
+    my $channels = $self->dbh->select_all(qq{SELECT id, count, max_message_id FROM channel});
     my $channel_ids = [map $_->{id}, @$channels];
     my $haveReads = $self->dbh->select_all(qq{SELECT * FROM haveread WHERE user_id = ? AND channel_id IN (?)}, $user_id, $channel_ids);
     my %haveread_map = map { $_->{channel_id} => $_ } @$haveReads;
@@ -328,7 +330,7 @@ get '/fetch' => sub {
         my $cnt = $channel->{count};
         my $haveread = $haveread_map{$channel->{id}};
         if ($haveread) {
-            if ($haveread->{message_id} < $channel->{count}) {
+            if ($haveread->{message_id} < $channel->{max_message_id}) {
                 $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel->{id}, $haveread->{message_id});
             } else {
                 $cnt = $haveread->{count};
