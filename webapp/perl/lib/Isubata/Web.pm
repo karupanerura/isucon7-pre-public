@@ -379,7 +379,7 @@ get '/history/{channel_id:[0-9]+}' => [qw/login_required/] => sub {
         };
     }
 
-    my ($channels) = $self->get_channel_list_info($channel_id);
+    my ($channels) = $self->dbh->select_all(qq{SELECT id, name FROM channel ORDER BY id});
 
     $c->render("history.tx", {
         channels   => $channels,
@@ -393,7 +393,7 @@ get '/history/{channel_id:[0-9]+}' => [qw/login_required/] => sub {
 get '/profile/:user_name' => [qw/login_required/] => sub {
     my ($self, $c) = @_;
 
-    my ($channels) = $self->get_channel_list_info;
+    my ($channels) = $self->dbh->select_all(qq{SELECT id, name FROM channel ORDER BY id});
 
     my $user = $self->dbh->select_row(qq{SELECT * FROM user WHERE name = ?}, $c->args->{user_name});
 
@@ -412,7 +412,7 @@ get '/profile/:user_name' => [qw/login_required/] => sub {
 
 get '/add_channel' => [qw/login_required/] => sub {
     my ($self, $c) = @_;
-    my ($channels) = $self->get_channel_list_info;
+    my ($channels) = $self->dbh->select_all(qq{SELECT id, name FROM channel ORDER BY id});
     $c->render('add_channel.tx', { channels => $channels });
 };
 

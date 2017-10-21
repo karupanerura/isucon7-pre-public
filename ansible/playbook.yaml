@@ -35,3 +35,9 @@
   tasks:
     - include: tasks/07_mysql.yaml
       tags: mysql
+
+- hosts: app
+  become: yes
+  tasks:
+    - include: tasks/08_isubata.yaml
+      tags: app
