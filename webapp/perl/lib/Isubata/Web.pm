@@ -319,7 +319,7 @@ get '/fetch' => sub {
             }
         }
         push @res, {
-            channel_id => $channel->{id},
+            channel_id => $channel->{id} + 0,
             unread     => $cnt,
         };
     }
