@@ -20,7 +20,7 @@ git commit -m 'set hosts' hosts
 ## 初回構築
 
 ```bash
-ansible-playbook -i hosts playbook.yaml --tags init
+ansible-playbook -i hosts playbook.yaml --tags init --ask-pass
 ```
 
 ## nginx
