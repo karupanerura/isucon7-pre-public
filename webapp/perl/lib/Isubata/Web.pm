@@ -143,7 +143,6 @@ get '/initialize' => sub {
     $self->dbh->query("DELETE FROM message WHERE id > 10000");
     $self->dbh->query("DELETE FROM haveread");
     $self->dbh->query("UPDATE channel SET count = (SELECT COUNT(1) FROM message WHERE channel_id = channel.id)");
-    $self->dbh->query("UPDATE channel SET max_message_id = (SELECT MAX(id) FROM message WHERE channel_id = channel.id)");
 
     $c->res->status(204);
     $c->res->body("");
@@ -267,7 +266,6 @@ get '/message' => sub {
             };
         }
 
-        my $max_message_id = max(map { $_->{id} } @$rows) || 0;
         my $channel_count = $self->dbh->select_one(qq{SELECT count FROM channel WHERE id = ?}, $channel_id);
 
         $self->dbh->query(qq{
