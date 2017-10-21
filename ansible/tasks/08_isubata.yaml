@@ -1,0 +1,10 @@
+---
+
+- name: git pull
+  git: repo=git@github.com:karupanerura/isucon7-pre.git version=master dest=/home/isucon/isubata update=yes
+  become: yes
+  become_user: isucon
+- name: setup systemd conf
+  copy: src=config/isubata.perl.service dest=/etc/systemd/system/isubata.perl.service owner=root group=root mode=0644
+- name: restart isubata
+  systemd: name=isubata.perl.service enabled=yes state=restarted daemon_reload=yes
