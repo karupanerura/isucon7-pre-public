@@ -250,17 +250,19 @@ get '/message' => sub {
     );
 
     my @res;
-    for my $row (@$rows) {
-        my $user = $self->dbh->select_row(qq{SELECT name, display_name, avatar_icon FROM user WHERE id = ?}, $row->{user_id});
-        unshift @res, {
-            id      => $row->{id},
-            user    => $user,
-            date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
-            content => $row->{content},
-        };
-    }
 
     if (0 < scalar @$rows) {
+        my %users_map = map { $_->{id} => $_ } @{ $self->dbh->select_all(qq{SELECT id, name, display_name, avatar_icon FROM user WHERE id IN (?)}, [map $_->{user_id}, @$rows]) };
+        for my $row (@$rows) {
+            my $user = $users_map{$row->{user_id}};
+            unshift @res, {
+                id      => $row->{id},
+                user    => $user,
+                date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
+                content => $row->{content},
+            };
+        }
+
         my $max_message_id = max(map { $_->{id} } @$rows);
 
         $self->dbh->query(qq{
