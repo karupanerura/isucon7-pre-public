@@ -435,7 +435,9 @@ post '/profile' => [qw/login_required/] => sub {
         $avatar_name = $digest . $ext;
         $avatar_data = $data;
 
-        system('cp ' . $file->path . ' /home/isucon/isubata/webapp/public/icons/' . $avatar_name);
+        my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $avatar_name;
+        system('cp ' . $file->path . ' ' . $fullpath);
+        system('chmod 755 ' . $fullpath);
     }
 
     my $avatar_updated = ($avatar_name && $avatar_data);
