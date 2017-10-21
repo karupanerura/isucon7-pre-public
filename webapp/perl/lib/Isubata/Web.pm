@@ -17,6 +17,12 @@ use constant {
     AVATAR_MAX_SIZE => 1 * 1024 * 1024,
 };
 
+my %SERVERS = (
+    0 => 'server-1',
+    1 => 'server-2',
+);
+my $MY_IP = `ip addr show scope global up | perl -ne 'print $1 if /(192\.168\..*)\//'`;
+
 sub dbh {
     my $self = shift;
 
@@ -428,18 +434,28 @@ post '/profile' => [qw/login_required/] => sub {
             $c->halt(400);
         }
 
-        open my $fh, '<', $file->path;
-        my $data = do { local $/; <$fh> }; # readall
-        close($fh);
+        my $digest = do {
+            open my $fh, '<', $file->path;
+            my $sha1 = Digest::SHA1->new;
+            $sha1->addfile($fh);
+            $sha1->hexdigest;
+        };
 
-        my $digest = sha1_hex($data);
+        my $server_id = hex($digest) % keys %SERVERS;
+        my $server = $SERVERS{$server_id};
+        my $avatar_basename = $digest . $ext;
 
-        $avatar_name = $digest . $ext;
+        my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $avatar_basename;
+
+        chmod 0755, $file->path;
+        if ($server eq $MY_IP) {
+            rename $file->path, $fullpath;
+        } else {
+            system scp => $file->path, "isucon@$server:$fullpath";
+        }
+
+        $avatar_name = $server_id . '/' . $avatar_basename;
         $avatar_data = $data;
-
-        my $fullpath = '/home/isucon/isubata/webapp/public/icons/' . $avatar_name;
-        system('cp ' . $file->path . ' ' . $fullpath);
-        system('chmod 755 ' . $fullpath);
     }
 
     my $avatar_updated = ($avatar_name && $avatar_data);
@@ -465,25 +481,5 @@ sub ext2mime {
     }
     return ''
 }
-
-get '/icons/:file_name' => sub {
-    my ($self, $c) = @_;
-
-    my $file_name = $c->args->{file_name};
-
-    my $row  = $self->dbh->select_row(qq{SELECT * FROM image WHERE name = ?}, $file_name);
-    my $idx  = index($file_name, ".");
-    my $ext  = (0 <= $idx) ? substr($file_name, $idx) : "";
-    my $mime = ext2mime($ext);
-
-    if ($row && $mime) {
-        $c->res->status(200);
-        $c->res->content_type($mime);
-        $c->res->body($row->{data});
-        return $c->res;
-    }
-
-    $c->halt(404);
-};
 
 1;
