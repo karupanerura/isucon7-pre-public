@@ -142,6 +142,7 @@ get '/initialize' => sub {
     $self->dbh->query("DELETE FROM channel WHERE id > 10");
     $self->dbh->query("DELETE FROM message WHERE id > 10000");
     $self->dbh->query("DELETE FROM haveread");
+    $self->dbh->query("UPDATE channel SET count = (SELECT COUNT(1) FROM message WHERE channel_id = channel.id)");
 
     $c->res->status(204);
     $c->res->body("");
