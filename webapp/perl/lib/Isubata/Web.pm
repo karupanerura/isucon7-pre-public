@@ -294,8 +294,6 @@ get '/fetch' => sub {
         $c->halt(403);
     }
 
-    usleep(int rand 1000);
-
     my $channels = $self->dbh->select_all(qq{SELECT id, count FROM channel});
     my $havereads = $self->dbh->select_all(qq{SELECT channel_id, count FROM haveread where user_id = ?}, $user_id);
 
