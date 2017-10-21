@@ -458,7 +458,7 @@ post '/profile' => [qw/login_required/] => sub {
 
     if ($avatar_name && $display_name) {
         $self->dbh->query(qq{UPDATE user SET avatar_icon = ?,  display_name = ? WHERE id = ?}, $avatar_name, $display_name, $user_id);
-    } elsif ($avatar_updated) {
+    } elsif ($avatar_name) {
         $self->dbh->query(qq{UPDATE user SET avatar_icon = ? WHERE id = ?}, $avatar_name, $user_id);
     } elsif ($display_name) {
         $self->dbh->query(qq{UPDATE user SET display_name = ? WHERE id = ?}, $display_name, $user_id);
