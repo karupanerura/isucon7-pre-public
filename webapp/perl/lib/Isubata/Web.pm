@@ -440,7 +440,7 @@ post '/profile' => [qw/login_required/] => sub {
             $sha1->hexdigest;
         };
 
-        my $server_id = hex($digest) % keys %SERVERS;
+        my $server_id = int rand keys %SERVERS;
         my $server = $SERVERS{$server_id};
         my $avatar_basename = $digest . $ext;
 
