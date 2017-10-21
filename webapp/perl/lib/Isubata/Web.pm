@@ -250,8 +250,9 @@ get '/message' => sub {
     );
 
     my @res;
+    my %users_map = map { $_->{id} => $_ } @{ $self->dbh->select_all(qq{SELECT name, display_name, avatar_icon FROM user WHERE id IN (?)}, [map $_->{user_id}, @$rows]) };
     for my $row (@$rows) {
-        my $user = $self->dbh->select_row(qq{SELECT name, display_name, avatar_icon FROM user WHERE id = ?}, $row->{user_id});
+        my $user = $users_map{$row->{user_id}};
         unshift @res, {
             id      => $row->{id},
             user    => $user,
