@@ -33,7 +33,7 @@ sub dbh {
 my $rows = dbh->select_all(qq{SELECT * FROM image});
 
 for my $row (@$rows) {
-    my $data = $rows->{data};
+    my $data = $row->{data};
     my $digest = sha1_hex($data);
     my $idx  = index($row->{name}, ".");
     my $ext  = (0 <= $idx) ? substr($row->{name}, $idx) : "";
@@ -44,5 +44,7 @@ for my $row (@$rows) {
     binmode $fh;
     print $fh $data;
     close($fh);
+
+    system('chmod 755 ' . $fullpath);
 }
 
