@@ -279,7 +279,7 @@ WHERE message.id > ? AND channel_id = ? ORDER BY message.id DESC LIMIT 100
     }
 
     if (0 < scalar @$rows) {
-        my $max_message_id = max(map { $_->{id} } @$rows);
+        my $max_message_id = max(map { $_->{id} } @$rows) || 0;
         my $unread_count = $self->dbh->select_one(qq{SELECT COUNT(1) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
 
         $self->dbh->query(qq{
@@ -312,7 +312,7 @@ get '/fetch' => sub {
         my $cnt = $channel->{count};
         my $haveread = $haveread_map{$channel->{id}};
         if ($haveread) {
-            if ($haveread->{message_id} < $channel->{max_message_id}) {
+            if ($haveread->{message_id} < $channel->{count}) {
                 $cnt = $self->dbh->select_one(qq{SELECT COUNT(*) FROM message WHERE channel_id = ? AND id > ?}, $channel->{id}, $haveread->{message_id});
             } else {
                 $cnt = $haveread->{count};
