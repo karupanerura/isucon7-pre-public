@@ -248,37 +248,53 @@ get '/message' => sub {
     my $last_message_id = $c->req->parameters->{last_message_id};
 
     my $rows = $self->dbh->select_all(
-        qq{
-SELECT
-message.id as message_id,
-channel_id,
-user_id,
-user.name as user_name,
-display_name,
-avatar_icon,
-content,
-message.created_at
-FROM message inner join user on user.id = user_id
-WHERE message.id > ? AND channel_id = ? ORDER BY message.id DESC LIMIT 100
-},
+        qq{SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100},
         $last_message_id, $channel_id,
     );
 
+#     my $rows = $self->dbh->select_all(
+#         qq{
+# SELECT
+# message.id as message_id,
+# channel_id,
+# user_id,
+# user.name as user_name,
+# display_name,
+# avatar_icon,
+# content,
+# message.created_at
+# FROM message inner join user on user.id = user_id
+# WHERE message.id > ? AND channel_id = ? ORDER BY message.id DESC LIMIT 100
+# },
+#         $last_message_id, $channel_id,
+#     );
+
     my @res;
-    for my $row (@$rows) {
-        unshift @res, {
-            id      => $row->{id},
-            user    => {
-                name => $row->{user_name},
-                display_name => $row->{display_name},
-                avatar_icon => $row->{avatar_icon},
-            },
-            date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
-            content => $row->{content},
-        };
-    }
+    # for my $row (@$rows) {
+    #     unshift @res, {
+    #         id      => $row->{id},
+    #         user    => {
+    #             name => $row->{user_name},
+    #             display_name => $row->{display_name},
+    #             avatar_icon => $row->{avatar_icon},
+    #         },
+    #         date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
+    #         content => $row->{content},
+    #     };
+    # }
 
     if (0 < scalar @$rows) {
+        my %users_map = map { $_->{id} => $_ } @{ $self->dbh->select_all(qq{SELECT id, name, display_name, avatar_icon FROM user WHERE id IN (?)}, [map $_->{user_id}, @$rows]) };
+        for my $row (@$rows) {
+            my $user = $users_map{$row->{user_id}};
+            unshift @res, {
+                id      => $row->{id},
+                user    => $user,
+                date    => DateTime::Format::MySQL->parse_datetime($row->{created_at})->strftime("%Y/%m/%d %H:%M:%S"),
+                content => $row->{content},
+            };
+        }
+
         my $max_message_id = max(map { $_->{id} } @$rows) || 0;
         my $unread_count = $self->dbh->select_one(qq{SELECT COUNT(1) FROM message WHERE channel_id = ? AND id > ?}, $channel_id, $max_message_id);
 
