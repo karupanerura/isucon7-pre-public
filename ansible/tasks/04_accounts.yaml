@@ -1,0 +1,28 @@
+---
+
+- name: create group
+  group: name=admin state=present
+- name: create users
+  user: name={{ item }} shell=/bin/bash groups=admin
+  with_items:
+    - silvers
+    - ar_tama
+    - karupanerura
+- name: add pubkey to authorized_keys (silvers)
+  authorized_key: user=silvers key={{ item }}
+  with_items:
+    - "ssh-rsa DUMMY DUMMY"
+- name: add pubkey to authorized_keys (ar_tama)
+  authorized_key: user=ar_tama key={{ item }}
+  with_items:
+    - "ssh-rsa DUMMY DUMMY"
+- name: add pubkey to authorized_keys (karupanerura)
+  authorized_key: user=karupanerura key={{ item }}
+  with_items:
+    - "ssh-rsa DUMMY DUMMY"
+- name: add pubkey to authorized_keys (isucon)
+  authorized_key: user=isucon key={{ item }}
+  with_items:
+    - "ssh-rsa DUMMY DUMMY"
+- name: sudo NOPASSWDnize
+  lineinfile: dest=/etc/sudoers state=present regexp='^%admin ALL\=' line='%admin ALL=(ALL) NOPASSWD:ALL' validate='visudo -cf %s'

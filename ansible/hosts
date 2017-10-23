@@ -1,0 +1,12 @@
+[rev]
+server-1
+server-2
+server-3
+
+[app]
+server-1
+server-2
+server-3
+
+[db]
+server-3
