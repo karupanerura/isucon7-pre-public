@@ -90,7 +90,7 @@ sudo systemctl start mysql
 
 ## 3. 競技サーバ初期セットアップ（Ansible）
 
-* [Ansible](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/README.md)
+* [Ansible](https://github.com/karupanerura/isucon7-pre-public/blob/master/ansible/README.md)
 
 - [ ] hosts(ansible inventory)を設定
 - [ ] nginxやmysqlの設定を変更

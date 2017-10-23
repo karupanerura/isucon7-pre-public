@@ -1,12 +1,12 @@
 # ISUCON7あんちょこ
 
-* [Ansible](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/README.md)
-* [スタートダッシュ](https://github.com/karupanerura/isucon7-pre/blob/master/anchoko/START-DASH.md)
-* [負荷分析](https://github.com/karupanerura/isucon7-pre/blob/master/anchoko/FUKABUNSEKI.md)
+* [Ansible](https://github.com/karupanerura/isucon7-pre-public/blob/master/ansible/README.md)
+* [スタートダッシュ](https://github.com/karupanerura/isucon7-pre-public/blob/master/anchoko/START-DASH.md)
+* [負荷分析](https://github.com/karupanerura/isucon7-pre-public/blob/master/anchoko/FUKABUNSEKI.md)
 
 ## スロークエリログの分析
 
-設定は [ansible/files/config/mysqld.cnf](https://github.com/karupanerura/isucon7-pre/blob/master/ansible/files/config/mysqld.cnf) を確認すること
+設定は [ansible/files/config/mysqld.cnf](https://github.com/karupanerura/isucon7-pre-public/blob/master/ansible/files/config/mysqld.cnf) を確認すること
 基本的には `/tmp/mysql-slow.log` に出るはず。
 
 ### 時間順に出す
